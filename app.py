@@ -50,9 +50,9 @@ def predict():
     image = Image.open(BytesIO(image_bytes))
 
     # Load the model and make predictions
-    model = torch.load('/efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
+    model = torch.load('efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
     predicted_class = predict_image(image, model, transform)
-
+    
     return jsonify({'prediction': predicted_class})
 
 
