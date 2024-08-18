@@ -4,7 +4,8 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
-
+import base64
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -39,18 +40,20 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # image_data = request.json['image']
-    # # Convert image data to numpy array
-    # model = torch.load('/efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
+    # Get the base64-encoded image from JSON
+    image_data = request.json['image']
+    
+    # Decode the base64 string to bytes
+    image_bytes = base64.b64decode(image_data)
+    
+    # Convert bytes to an image using PIL
+    image = Image.open(BytesIO(image_bytes))
 
-    # # Make prediction using your ML model
-    # # prediction = predict_doodle(image_array)
+    # Load the model and make predictions
+    model = torch.load('/efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
+    predicted_class = predict_image(image, model, transform)
 
-    # # For demonstration, we'll return a dummy prediction
-
-    # predicted_class = predict_image(image_data, model, transform)
-
-    return jsonify({'prediction': "predicted_class"})
+    return jsonify({'prediction': predicted_class})
 
 
 if __name__ == '__main__':
