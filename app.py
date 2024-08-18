@@ -40,19 +40,24 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Get the base64-encoded image from JSON
+    # Get base64-encoded image from the request
     image_data = request.json['image']
-    
-    # Decode the base64 string to bytes
+
+    if isinstance(image_data, list):
+        image_data = ''.join(image_data)
+
+    # If the string includes a base64 header, remove it
+    if image_data.startswith('data:image'):
+        image_data = image_data.split(',')[1]
+
+    # Decode and process the image
     image_bytes = base64.b64decode(image_data)
-    
-    # Convert bytes to an image using PIL
     image = Image.open(BytesIO(image_bytes))
 
     # Load the model and make predictions
-    model = torch.load('efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
+    model = torch.load('efficientnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
     predicted_class = predict_image(image, model, transform)
-    
+
     return jsonify({'prediction': predicted_class})
 
 
