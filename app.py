@@ -8,7 +8,6 @@ from PIL import Image
 import base64
 from io import BytesIO
 
-import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 
