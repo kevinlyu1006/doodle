@@ -39,18 +39,18 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    image_data = request.json['image']
-    # Convert image data to numpy array
-    model = torch.load('/efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
+    # image_data = request.json['image']
+    # # Convert image data to numpy array
+    # model = torch.load('/efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
 
-    # Make prediction using your ML model
-    # prediction = predict_doodle(image_array)
+    # # Make prediction using your ML model
+    # # prediction = predict_doodle(image_array)
 
-    # For demonstration, we'll return a dummy prediction
+    # # For demonstration, we'll return a dummy prediction
 
-    predicted_class = predict_image(image_data, model, transform)
+    # predicted_class = predict_image(image_data, model, transform)
 
-    return jsonify({'prediction': predicted_class})
+    return jsonify({'prediction': "predicted_class"})
 
 
 if __name__ == '__main__':
