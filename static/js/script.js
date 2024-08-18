@@ -48,22 +48,19 @@ clearBtn.addEventListener('click', () => {
 });
 
 guessBtn.addEventListener('click', async () => {
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-    const grayScaleData = [];
+    // Convert canvas to base64 image
+    const dataURL = canvas.toDataURL('image/png');
 
-    for (let i = 0; i < imageData.length; i += 4) {
-        const avg = (imageData[i] + imageData[i + 1] + imageData[i + 2]) / 3;
-        grayScaleData.push(avg);
-    }
-
+    // Send the base64-encoded image to the backend
     const response = await fetch('/predict', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ image: grayScaleData }),
+        body: JSON.stringify({ image: dataURL }),
     });
 
+    // Handle the response from the backend
     const data = await response.json();
     result.textContent = `I think it's a ${data.prediction}!`;
 });
