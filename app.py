@@ -122,7 +122,7 @@ indexToLabel = {0: 'traffic light',
  107: 'bird',
  108: 'fish'}
 
-model = torch.load('efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
+model = torch.load('quantizedModel.pth', map_location=torch.device("cpu"))
 model.eval()
 
 
