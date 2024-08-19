@@ -122,6 +122,9 @@ indexToLabel = {0: 'traffic light',
  107: 'bird',
  108: 'fish'}
 
+model = torch.load('efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
+model.eval()
+
 
 transform = transforms.Compose([
     transforms.Resize((256, 256)),
@@ -134,7 +137,6 @@ def predict_image(image, model, transform):
     image = image.convert('RGB')
     image = transform(image).unsqueeze(0)  # Add batch dimension
     # Make prediction
-    model.eval()
 
     with torch.no_grad():
         image = image.to("cpu")  # Move image to the same device as the model
@@ -181,8 +183,6 @@ def predict():
 
 # Convert grayscale image to binary (black-and-white)
 
-    # Load the model
-    model = torch.load('efficentnetv2DoodleModel6.6.pth', map_location=torch.device("cpu"))
 
     # Make prediction
     predicted_class = predict_image(new_image, model, transform)
