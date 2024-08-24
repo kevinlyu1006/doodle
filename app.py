@@ -6,7 +6,6 @@ import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 import base64
-from io import BytesIO
 
 
 app = Flask(__name__)
@@ -122,7 +121,7 @@ indexToLabel = {0: 'traffic light',
  107: 'bird',
  108: 'fish'}
 
-model = torch.load('quantizedModel.pth', map_location=torch.device("cpu"))
+model = torch.jit.load('efficentnetv2DoodleModel6.6_scripted.pt')
 model.eval()
 
 
@@ -137,13 +136,19 @@ def predict_image(image, model, transform):
     image = image.convert('RGB')
     image = transform(image).unsqueeze(0)  # Add batch dimension
     # Make prediction
-
+    predictions = []
     with torch.no_grad():
         image = image.to("cpu")  # Move image to the same device as the model
         output = model(image)
         probabilities = F.softmax(output, dim=1)  # Apply softmax to get probabilities
-        predicted_class = torch.argmax(probabilities, dim=1)
-    return predicted_class.item()
+        top5_values, top5_indices = torch.topk(probabilities, 5, dim=1)
+        predictions = []
+        for i in range(5):
+            predictions.append({
+                "label": indexToLabel[top5_indices[0, i].item()],  # Assuming batch size is 1
+                "probability": top5_values[0, i].item()            # Get the probability
+            })
+    return predictions
 
 
 
@@ -155,39 +160,27 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Get the data from the request
     data = request.json
     image_data = data['image']
-
-    # Extract base64 string without the data URL prefix
     header, encoded = image_data.split(',', 1)
     image_bytes = base64.b64decode(encoded)
-
-    # Convert image bytes to a PIL image
     image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
 
-# Convert image to grayscale
+    # Convert image to grayscale
     gray_image = image.convert('L')
-
-    # Convert grayscale image to binary (black-and-white)
     threshold = 1  # Adjust this value if needed
     binary_image = gray_image.point(lambda p: 255 if p > threshold else 0)
 
-    # Create a new image with white background
+    # Create a new image with a white background
     background_color = (255, 255, 255)  # White background
     new_image = Image.new('RGB', image.size, background_color)
-
-    # Paste the binary image onto the new image, using black as the mask
-    black_mask = binary_image.convert('L')  # Convert to L mode for the mask
+    black_mask = binary_image.convert('L')
     new_image.paste((0, 0, 0), (0, 0, image.size[0], image.size[1]), black_mask)
 
-# Convert grayscale image to binary (black-and-white)
-
-
     # Make prediction
-    predicted_class = predict_image(new_image, model, transform)
+    predictions = predict_image(new_image, model, transform)
 
-    return jsonify({'prediction': indexToLabel[predicted_class]})
+    return jsonify({'predictions': predictions})
 
 if __name__ == '__main__':
     app.run(debug=True)
