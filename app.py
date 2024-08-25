@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 import base64
+import numpy as np
 
 
 app = Flask(__name__)
@@ -131,25 +132,6 @@ transform = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ])
 
-def predict_image(image, model, transform):
-    # Load and preprocess the image
-    image = image.convert('RGB')
-    image = transform(image).unsqueeze(0)  # Add batch dimension
-    # Make prediction
-    predictions = []
-    with torch.no_grad():
-        image = image.to("cpu")  # Move image to the same device as the model
-        output = model(image)
-        probabilities = F.softmax(output, dim=1)  # Apply softmax to get probabilities
-        top5_values, top5_indices = torch.topk(probabilities, 5, dim=1)
-        predictions = []
-        for i in range(5):
-            predictions.append({
-                "label": indexToLabel[top5_indices[0, i].item()],  # Assuming batch size is 1
-                "probability": top5_values[0, i].item()            # Get the probability
-            })
-    return predictions
-
 
 
 
@@ -178,9 +160,17 @@ def predict():
     new_image.paste((0, 0, 0), (0, 0, image.size[0], image.size[1]), black_mask)
 
     # Make prediction
-    predictions = predict_image(new_image, model, transform)
+    image = new_image
+    image = image.convert('RGB')
+    image = transform(image).unsqueeze(0)  # Add batch dimension
+    flattened_tensor = torch.flatten(image)
 
-    return jsonify({'predictions': predictions})
+    np_array = flattened_tensor.numpy()
+
+    # Convert NumPy array to list (JSON serializable)
+    tensor_list = np_array.tolist()
+    
+    return jsonify({'tensor': tensor_list})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)

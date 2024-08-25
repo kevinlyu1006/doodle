@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doodle Guesser</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.14.0/dist/ort.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -30,7 +31,7 @@
             <div class="bg-slambook-canvas rounded-lg shadow-md p-6 inline-block">
                 <div class="flex flex-col md:flex-row justify-center items-start space-y-6 md:space-y-0 md:space-x-6">
                     <div class="flex-none">
-                        <canvas id="drawingCanvas" width="350" height="350" class="border-2 border-slambook-button rounded-lg"></canvas>
+                        <canvas id="drawingCanvas" width="360" height="360" class="border-2 border-slambook-button rounded-lg"></canvas>
                         <div class="mt-4 text-center">
                             <button id="clearBtn" class="bg-slambook-button hover:bg-slambook-accent text-slambook-text font-bold py-2 px-4 rounded transition duration-300">Clear</button>
                         </div>
