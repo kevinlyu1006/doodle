@@ -122,8 +122,7 @@ indexToLabel = {0: 'traffic light',
  107: 'bird',
  108: 'fish'}
 
-model = torch.jit.load('efficentnetv2DoodleModel6.6_scripted.pt')
-model.eval()
+
 
 
 transform = transforms.Compose([
